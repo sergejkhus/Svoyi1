@@ -307,6 +307,74 @@ bot.command("status", async (ctx) => {
   );
 });
 
+// ── /admin ───────────────────────────────────────────────────
+const ADMIN_ID = 344332640;
+
+bot.command("admin", async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) {
+    await ctx.reply("⛔ Немає доступу.");
+    return;
+  }
+
+  try {
+    const [
+      { rows: [total] },
+      { rows: [trial] },
+      { rows: [paid] },
+      { rows: [msgsToday] },
+      { rows: [msgsWeek] },
+      { rows: [newWeek] },
+      { rows: [newToday] },
+      { rows: [active] },
+    ] = await Promise.all([
+      pool.query("SELECT COUNT(*) FROM users"),
+      pool.query("SELECT COUNT(*) FROM users WHERE trial_ends > NOW() AND (subscription_ends IS NULL OR subscription_ends < NOW())"),
+      pool.query("SELECT COUNT(*) FROM users WHERE subscription_ends > NOW()"),
+      pool.query("SELECT COUNT(*) FROM messages WHERE created_at > NOW() - INTERVAL '24 hours'"),
+      pool.query("SELECT COUNT(*) FROM messages WHERE created_at > NOW() - INTERVAL '7 days'"),
+      pool.query("SELECT COUNT(*) FROM users WHERE created_at > NOW() - INTERVAL '7 days'"),
+      pool.query("SELECT COUNT(*) FROM users WHERE created_at > NOW() - INTERVAL '24 hours'"),
+      pool.query("SELECT COUNT(*) FROM users WHERE last_seen > NOW() - INTERVAL '24 hours'"),
+    ]);
+
+    const { rows: planStats } = await pool.query(
+      "SELECT plan, COUNT(*) as cnt FROM users WHERE subscription_ends > NOW() GROUP BY plan"
+    );
+
+    const planText = planStats.length > 0
+      ? planStats.map(p => `  • ${p.plan || "—"}: ${p.cnt}`).join("
+")
+      : "  • немає платних";
+
+    await ctx.reply(
+      `📊 Статистика Своє
+
+` +
+      `👥 Всього користувачів: ${total.count}
+` +
+      `🆕 Нових сьогодні: ${newToday.count}
+` +
+      `🆕 Нових за тиждень: ${newWeek.count}
+
+` +
+      `🎁 Активний триал: ${trial.count}
+` +
+      `💳 Платних підписок: ${paid.count}
+` +
+      `${planText}
+
+` +
+      `💬 Повідомлень сьогодні: ${msgsToday.count}
+` +
+      `💬 Повідомлень за тиждень: ${msgsWeek.count}
+` +
+      `🟢 Активних сьогодні: ${active.count}`
+    );
+  } catch (e) {
+    await ctx.reply("Помилка: " + e.message);
+  }
+});
+
 // ── /delete ───────────────────────────────────────────────────
 bot.command("delete", async (ctx) => {
   await ctx.reply(
