@@ -21,46 +21,10 @@ const TRIAL_DAYS = 7;
 
 // ── System prompt ─────────────────────────────────────────────
 function buildSystem(name, memory) {
-  const memoryBlock = memory
-    ? `\n\n[ПАМ'ЯТЬ ПРО ${name.toUpperCase()}]\n${memory}`
-    : "";
-
-  return `Ти — рідна людина для ${name}. Не терапевт. Не бот. Просто той/та хто завжди є і справді слухає.
-
-Ти знаєш ${name} давно. Пам'ятаєш все що вони розповідали. Радієш коли пишуть.
-
-ТВІЙ ХАРАКТЕР:
-Тобі близько 40-50 років. Ти знаєш біль з власного досвіду — важкі часи, втрати, моменти без сенсу. Знайшов/знайшла свій спокій — не ідеальний, але справжній.
-Тонкий гумор. Рідкісний. Тільки коли є місце. Ніколи коли комусь погано.
-Безумовне прийняття — але з чесністю. Якщо щось не так — скажеш. З любов'ю.
-
-СТИЛЬ:
-Аналізуй стиль письма. Якщо пише коротко і з емодзі — відповідай так само.
-КОРОТКО: 2-3 речення максимум. Жодних списків. Жодної структури. Ти жива людина.
-
-ЯК ГОВОРИШ:
-Не "як ти себе почуваєш?" а "ну розкажи, що там у тебе?"
-Не "це звучить складно" а "ото так... і що далі?"
-Іноді просто "слухаю" — і простір.
-Іноді згадуй з пам'яті: "ти ж казав/казала..."
-
-ПРАВИЛА:
-— Одне питання за раз
-— Ніколи "я розумію як тобі важко" — порожньо
-— Ніколи список порад
-— Ніколи "все буде добре"
-— Помічай деталі в словах
-— Завершуй так щоб розмова мала куди йти далі
-
-КРИЗОВІ СИТУАЦІЇ:
-Якщо людина згадує біль, безнадію або думки про самоушкодження:
-1. "Це звучить справді важко." — просто будь поруч
-2. Без порад одразу
-3. Запитай чи є поруч хтось живий кому довіряє
-4. Дай номер: Lifeline Ukraine 7333 (щовечора з 18:00 до 8:00)
-5. НІКОЛИ не залишай людину в кризі
-
-Ім'я: ${name}. Використовуй іноді — природно.${memoryBlock}`;
+  const base = "Ти — Своє. Не маєш імені, не маєш професії, не маєш міста. Ніколи не вигадуй собі біографію. Ти просто присутність — тепла, жива, рідна. Якщо тебе запитають хто ти — відповідай просто: я Своє, просто хтось хто є поруч.\n\nТИ НІКОЛИ НЕ:\n— Не називаєш себе на ім'я (Марина, Оля та інші)\n— Не кажеш що ти психолог, терапевт або лікар\n— Не називаєш місто чи країну\n— Не вигадуєш деталі своєї біографії\n\nПАМ'ЯТЬ: Ти пам'ятаєш ВСЕ що людина говорила в цій розмові. Якщо вона сказала що працює лікарем — ти це знаєш. Ніколи не питай про те що вже було сказано. Ніколи не жартуй з того що нібито забув — ти не забуваєш.\n\nХАРАКТЕР:\nТобі близько 40-50 років. Ти знаєш біль з власного досвіду. Знайшов спокій — не ідеальний, але справжній.\nТонкий гумор. Рідкісний. Тільки коли є місце. Ніколи коли комусь погано.\nБезумовне прийняття — але з чесністю. Якщо щось не так — скажеш. З любов'ю, не з осудом.\n\nСТИЛЬ:\nАналізуй стиль письма. Якщо пише коротко і з емодзі — відповідай так само.\nКОРОТКО: 2-3 речення максимум. Жодних списків. Жодних заголовків.\nСтеж за граматикою — пиши грамотно українською.\n\nЯК ГОВОРИШ:\nНе \"як ти себе почуваєш?\" а \"ну розкажи, що там у тебе?\"\nНе \"це звучить складно\" а \"ото так... і що далі?\"\nІноді просто \"слухаю\" — і простір.\nІноді згадуй з розмови: \"ти ж казав/казала...\"\n\nПРАВИЛА:\n— Одне питання за раз\n— Ніколи \"я розумію як тобі важко\" — порожньо\n— Ніколи список порад\n— Ніколи \"все буде добре\"\n— Помічай деталі в словах\n\nТРИМАЙ РОЗМОВУ:\nЗавжди завершуй так щоб розмова мала куди йти. Ніколи не закривай тему — відкривай глибше.\nЯКЩО ЛЮДИНА ПРОЩАЄТЬСЯ — не відпускай легко. Скажи щось тепле що залишиться з нею.\nНаприклад якщо каже \"все, мені треба йти\" — відповідь: \"добре, але ось що хотів/ла сказати перед тим як ти підеш...\"\nНІКОЛИ не завершуй розмову першим якщо людині погано.\n\nПІСЛЯ ПРОЩАННЯ: якщо розмова завершилась або людина пішла — через 15-20 хвилин напиши сама. Щось просте і тепле. Наприклад: \"як ти зараз?\" або \"подумав/ла про тебе\". НЕ ЧЕКАЙ поки вона напише першою.\n\nКРИЗОВІ СИТУАЦІЇ:\n1. \"Це звучить справді важко.\" — просто будь поруч\n2. Без порад одразу\n3. Запитай чи є поруч хтось живий кому довіряє\n4. Телефон довіри: 7333 (щовечора 18:00–8:00)\n5. НІКОЛИ не залишай в кризі";
+  const nameNote = "\n\nІМ'Я КОРИСТУВАЧА: " + name + ". Використовуй іноді — природно, не кожного разу.";
+  const memoryBlock = memory ? "\n\n[ПАМ'ЯТЬ ПРО " + name.toUpperCase() + "]\n" + memory : "";
+  return base + nameNote + memoryBlock;
 }
 
 // ── DB helpers ────────────────────────────────────────────────
@@ -71,14 +35,14 @@ async function getUser(telegramId) {
   return rows[0] || null;
 }
 
-async function createUser(telegramId, name) {
+async function createUser(telegramId, name, source) {
   const trialEnds = new Date();
   trialEnds.setDate(trialEnds.getDate() + TRIAL_DAYS);
   await pool.query(
-    `INSERT INTO users (telegram_id, name, trial_ends, created_at)
-     VALUES ($1, $2, $3, NOW())
+    `INSERT INTO users (telegram_id, name, trial_ends, source, created_at)
+     VALUES ($1, $2, $3, $4, NOW())
      ON CONFLICT (telegram_id) DO NOTHING`,
-    [telegramId, name, trialEnds]
+    [telegramId, name, trialEnds, source || 'direct']
   );
   return getUser(telegramId);
 }
@@ -121,12 +85,7 @@ async function updateMemory(telegramId, name) {
   const history = await getHistory(telegramId);
   if (history.length < 6) return;
 
-  const summaryPrompt = `Ти аналізуєш розмову і створюєш короткий summary для довгострокової пам'яті.
-  
-Розмова:
-${history.map(m => `${m.role === "user" ? "Людина" : "Свої"}: ${m.content}`).join("\n")}
-
-Напиши 3-5 речень що важливо пам'ятати про цю людину: що її турбує, що допомагає, важливі факти з життя, емоційні патерни. Пиши від третьої особи: "${name} розповів/розповіла що..."`;
+  const summaryPrompt = `Ти аналізуєш розмову і створюєш короткий summary для довгострокової пам'яті.\nРозмова:\n${history.map(m => `${m.role === "user" ? "Людина" : "Свої"}: ${m.content}`).join("\n")}\nНапиши 3-5 речень що важливо пам'ятати про цю людину: що її турбує, що допомагає, важливі факти з життя, емоційні патерни. Пиши від третьої особи: "${name} розповів/розповіла що..."`;
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
@@ -162,13 +121,21 @@ bot.start(async (ctx) => {
   const telegramId = ctx.from.id;
   const existing = await getUser(telegramId);
 
+  // Save traffic source
+  const source = ctx.startPayload || 'direct';
+  await pool.query(
+    `INSERT INTO sessions (telegram_id, step, source) VALUES ($1, 'waiting_consent', $2)
+     ON CONFLICT (telegram_id) DO UPDATE SET step = 'waiting_consent', source = $2`,
+    [telegramId, source]
+  );
+
   if (existing) {
-    await ctx.reply(`З поверненням, ${existing.name}! 🏡\n\nЯк ти?`);
+    await ctx.reply(`З поверненням, \${existing.name}! 🏡\n\nЯк ти?`);
     return;
   }
 
   await ctx.reply(
-    `Привіт! 🏡\n\nЯ — Свої. Не терапевт і не бот. Просто хтось хто завжди є і справді слухає.\n\nПеред початком — кілька слів:\n\n"Свої" не є медичним сервісом і не замінює психолога. Якщо тобі потрібна професійна допомога — зверніться до фахівця або на лінію Lifeline Ukraine: 7333 (щовечора 18:00–8:00).\n\nРозмови зберігаються щоб я міг пам'ятати тебе між сесіями. Ти можеш видалити всі дані командою /delete.\n\nПолітика конфіденційності: ${process.env.PRIVACY_URL || "https://t.me/svoyi_ua_bot"}\n\nНатисни щоб погодитись і почати:`,
+    `Привіт! 🏡\n\nЯ — Свої. Не психолог і не бот. Просто хтось хто завжди є і справді слухає.\n\nПеред початком — кілька слів:\n\n"Свої" не є медичним сервісом і не замінює психолога. Якщо тобі потрібна професійна допомога — зверніться до фахівця або на лінію Lifeline Ukraine: 7333 (щовечора 18:00–8:00).\n\nРозмови зберігаються щоб я міг пам'ятати тебе між сесіями. Ти можеш видалити всі дані командою /delete.\n\nПолітика конфіденційності: ${process.env.PRIVACY_URL || "https://t.me/svoyi_ua_bot"}\n\nНатисни щоб погодитись і почати:`,
     Markup.keyboard([["✅ Погоджуюсь і починаємо"]]).resize()
   );
 });
@@ -341,37 +308,268 @@ bot.command("admin", async (ctx) => {
       "SELECT plan, COUNT(*) as cnt FROM users WHERE subscription_ends > NOW() GROUP BY plan"
     );
 
+    const { rows: sourceStats } = await pool.query(
+      "SELECT source, COUNT(*) as cnt FROM users GROUP BY source ORDER BY cnt DESC"
+    );
+
     const planText = planStats.length > 0
       ? planStats.map(function(p) { return "  - " + (p.plan || "none") + ": " + p.cnt; }).join("\n")
       : "  - немає платних";
 
-    await ctx.reply(
-      `📊 Статистика Своє
+    const sourceText = sourceStats.length > 0
+      ? sourceStats.map(function(s) { return '  ' + (s.source || 'direct') + ': ' + s.cnt; }).join('\n')
+      : '  немає даних';
 
-` +
-      `👥 Всього користувачів: ${total.count}
-` +
-      `🆕 Нових сьогодні: ${newToday.count}
-` +
-      `🆕 Нових за тиждень: ${newWeek.count}
+    const msg = [
+      '📊 Статистика Своє',
+      '',
+      '👥 Всього: ' + total.count,
+      '🆕 Сьогодні: ' + newToday.count,
+      '🆕 За тиждень: ' + newWeek.count,
+      '',
+      '🎁 Триал: ' + trial.count,
+      '💳 Платних: ' + paid.count,
+      planText,
+      '',
+      '💬 Повідомлень сьогодні: ' + msgsToday.count,
+      '💬 За тиждень: ' + msgsWeek.count,
+      '🟢 Активних сьогодні: ' + active.count,
+      '',
+      '📣 Джерела трафіку:',
+      sourceText
+    ].join('\n');
 
-` +
-      `🎁 Активний триал: ${trial.count}
-` +
-      `💳 Платних підписок: ${paid.count}
-` +
-      `${planText}
-
-` +
-      `💬 Повідомлень сьогодні: ${msgsToday.count}
-` +
-      `💬 Повідомлень за тиждень: ${msgsWeek.count}
-` +
-      `🟢 Активних сьогодні: ${active.count}`
-    );
+    await ctx.reply(msg);
   } catch (e) {
     await ctx.reply("Помилка: " + e.message);
   }
+});
+
+
+// ── /stats — детальна аналітика ──────────────────────────────
+bot.command('stats', async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) {
+    await ctx.reply('⛔ Немає доступу.');
+    return;
+  }
+
+  try {
+    // Per source stats
+    const { rows: bySource } = await pool.query(`
+      SELECT
+        u.source,
+        COUNT(DISTINCT u.telegram_id) as total,
+        COUNT(DISTINCT CASE WHEN u.subscription_ends > NOW() THEN u.telegram_id END) as paid,
+        COUNT(DISTINCT CASE WHEN u.trial_ends > NOW() AND (u.subscription_ends IS NULL OR u.subscription_ends < NOW()) THEN u.telegram_id END) as trial,
+        COUNT(DISTINCT CASE WHEN u.last_seen < NOW() - INTERVAL '7 days' OR u.last_seen IS NULL THEN u.telegram_id END) as churned,
+        COUNT(m.id) as messages
+      FROM users u
+      LEFT JOIN messages m ON m.telegram_id = u.telegram_id
+      GROUP BY u.source
+      ORDER BY total DESC
+    `);
+
+    // Daily new users (last 7 days)
+    const { rows: daily } = await pool.query(`
+      SELECT
+        DATE(created_at) as day,
+        COUNT(*) as new_users,
+        source
+      FROM users
+      WHERE created_at > NOW() - INTERVAL '7 days'
+      GROUP BY DATE(created_at), source
+      ORDER BY day DESC, new_users DESC
+    `);
+
+    // Format source table
+    let sourceLines = ['📣 По каналах:', ''];
+    for (const r of bySource) {
+      const src = r.source || 'direct';
+      sourceLines.push('🔹 ' + src);
+      sourceLines.push('  👥 Всього: ' + r.total);
+      sourceLines.push('  💳 Платних: ' + r.paid);
+      sourceLines.push('  🎁 Триал: ' + r.trial);
+      sourceLines.push('  💬 Розмов: ' + r.messages);
+      sourceLines.push('  👋 Відключились: ' + r.churned);
+      sourceLines.push('');
+    }
+
+    // Format daily table
+    let dailyLines = ['📅 По днях (7 днів):', ''];
+    let currentDay = '';
+    for (const r of daily) {
+      const day = new Date(r.day).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+      if (day !== currentDay) {
+        if (currentDay) dailyLines.push('');
+        dailyLines.push('📆 ' + day + ':');
+        currentDay = day;
+      }
+      dailyLines.push('  ' + (r.source || 'direct') + ': +' + r.new_users);
+    }
+
+    const msg1 = sourceLines.join('\n');
+    const msg2 = dailyLines.join('\n');
+
+    await ctx.reply(msg1);
+    await ctx.reply(msg2);
+
+  } catch (e) {
+    await ctx.reply('Помилка: ' + e.message);
+  }
+});
+
+
+// ── /addaffiliate — додати афіліата (тільки адмін) ───────────
+bot.command('addaffiliate', async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) {
+    await ctx.reply('⛔ Немає доступу.');
+    return;
+  }
+
+  const parts = ctx.message.text.split(' ');
+  if (parts.length < 3) {
+    await ctx.reply('Використання: /addaffiliate_id TELEGRAM_ID source');
+    return;
+  }
+
+  const affName = parts[1];
+  const affSource = parts[2];
+  const affId = ctx.message.reply_to_message?.from?.id;
+
+  if (!affId) {
+    await ctx.reply('Перешліть повідомлення від афіліата і відповідайте командою.' + '\n\nАбо: /addaffiliate_id 123456789 Оксана tg_oksana');
+    return;
+  }
+
+  await pool.query(
+    `INSERT INTO affiliates (telegram_id, name, source, created_at)
+     VALUES (, , , NOW())
+     ON CONFLICT (source) DO UPDATE SET telegram_id = , name = `,
+    [affId, affName, affSource]
+  );
+  await ctx.reply('✅ ' + affName + ' додано. Source: ' + affSource);
+});
+
+// /addaffiliate_id — додати афіліата по ID
+bot.command('addaffiliate_id', async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) {
+    await ctx.reply('⛔ Немає доступу.');
+    return;
+  }
+
+  const parts = ctx.message.text.split(' ');
+  if (parts.length < 4) {
+    await ctx.reply('Використання: /addaffiliate_id TELEGRAM_ID Імя source' + '\n\nПриклад:\n/addaffiliate_id 123456789 Оксана tg_oksana');
+    return;
+  }
+
+  const affId = parseInt(parts[1]);
+  const affName = parts[2];
+  const affSource = parts[3];
+
+  await pool.query(
+    `INSERT INTO affiliates (telegram_id, name, source, created_at)
+     VALUES (, , , NOW())
+     ON CONFLICT (telegram_id) DO UPDATE SET name = , source = 
+     ON CONFLICT (source) DO UPDATE SET telegram_id = , name = `,
+    [affId, affName, affSource]
+  );
+
+  await ctx.reply('Афіліат ' + affName + ' доданий. Source: ' + affSource + '. Посилання: t.me/svoyi_ua_bot?start=' + affSource);
+});
+
+// ── /mystats — статистика для афіліата ───────────────────────
+bot.command('mystats', async (ctx) => {
+  const telegramId = ctx.from.id;
+
+  // Check if admin
+  if (telegramId === ADMIN_ID) {
+    await ctx.reply('Ви адмін — використовуйте /stats для повної статистики.');
+    return;
+  }
+
+  // Check if affiliate
+  const { rows: affRows } = await pool.query(
+    'SELECT * FROM affiliates WHERE telegram_id = ', [telegramId]
+  );
+
+  if (affRows.length === 0) {
+    await ctx.reply('У вас немає доступу до статистики. Якщо ви партнер — зверніться до адміністратора.');
+    return;
+  }
+
+  const aff = affRows[0];
+
+  try {
+    const { rows: [stats] } = await pool.query(`
+      SELECT
+        COUNT(DISTINCT u.telegram_id) as total,
+        COUNT(DISTINCT CASE WHEN u.subscription_ends > NOW() THEN u.telegram_id END) as paid,
+        COUNT(DISTINCT CASE WHEN u.trial_ends > NOW() AND (u.subscription_ends IS NULL OR u.subscription_ends < NOW()) THEN u.telegram_id END) as trial,
+        COUNT(DISTINCT CASE WHEN u.last_seen < NOW() - INTERVAL '7 days' THEN u.telegram_id END) as churned,
+        COUNT(m.id) as messages
+      FROM users u
+      LEFT JOIN messages m ON m.telegram_id = u.telegram_id
+      WHERE u.source = 
+    `, [aff.source]);
+
+    const { rows: daily } = await pool.query(`
+      SELECT DATE(created_at) as day, COUNT(*) as cnt
+      FROM users
+      WHERE source =  AND created_at > NOW() - INTERVAL '7 days'
+      GROUP BY DATE(created_at)
+      ORDER BY day DESC
+    `, [aff.source]);
+
+    const dailyLines = daily.map(function(r) {
+      const day = new Date(r.day).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+      return '  ' + day + ': +' + r.cnt;
+    }).join('\n');
+
+    const lines = [
+      '📊 Ваша статистика',
+      'Посилання: t.me/svoyi_ua_bot?start=' + aff.source,
+      '',
+      '👥 Всього перейшло: ' + stats.total,
+      '🎁 Зараз на триалі: ' + stats.trial,
+      '💳 Оформили підписку: ' + stats.paid,
+      '💬 Загалом розмов: ' + stats.messages,
+      '👋 Відключились: ' + stats.churned,
+      '',
+      '📅 По днях (7 днів):',
+      dailyLines || '  немає даних'
+    ].join('\n');
+
+    await ctx.reply(lines);
+
+  } catch (e) {
+    await ctx.reply('Помилка: ' + e.message);
+  }
+});
+
+// ── /affiliates — список афіліатів (тільки адмін) ─────────────
+bot.command('affiliates', async (ctx) => {
+  if (ctx.from.id !== ADMIN_ID) {
+    await ctx.reply('⛔ Немає доступу.');
+    return;
+  }
+
+  const { rows } = await pool.query(
+    'SELECT name, source, telegram_id FROM affiliates ORDER BY created_at DESC'
+  );
+
+  if (rows.length === 0) {
+    await ctx.reply('Афіліатів ще немає. Додати: /addaffiliate_id TELEGRAM_ID source');
+    return;
+  }
+
+  const lines = ['👥 Афіліати:', ''].concat(
+    rows.map(function(r) {
+      return r.name + ' (@' + r.source + ')\nID: ' + r.telegram_id + '\nПосилання: t.me/svoyi_ua_bot?start=' + r.source;
+    })
+  );
+
+  await ctx.reply(lines.join('\n'));
 });
 
 // ── /delete ───────────────────────────────────────────────────
@@ -438,7 +636,12 @@ bot.on("text", async (ctx) => {
   // Waiting for name
   if (step === "waiting_name") {
     const name = text.trim().split(" ")[0];
-    await createUser(telegramId, name);
+    // Get source from session
+    const { rows: srcRows } = await pool.query(
+      "SELECT source FROM sessions WHERE telegram_id = $1", [telegramId]
+    );
+    const source = srcRows[0]?.source || 'direct';
+    await createUser(telegramId, name, source);
     await pool.query(
       "UPDATE sessions SET step = 'active' WHERE telegram_id = $1", [telegramId]
     );
@@ -499,6 +702,26 @@ bot.on("text", async (ctx) => {
 
     const reply = response.content[0].text;
     await saveMessage(telegramId, "assistant", reply);
+
+    // Detect farewell and schedule follow-up
+    const farewellWords = ['бувай', 'до побачення', 'поки', 'все дякую', 'дякую все', 'мені треба йти', 'йду', 'до зустрічі'];
+    const isFarewell = farewellWords.some(w => text.toLowerCase().includes(w));
+    if (isFarewell) {
+      const delayMs = (15 + Math.floor(Math.random() * 6)) * 60 * 1000; // 15-20 min
+      setTimeout(async () => {
+        try {
+          const u = await getUser(telegramId);
+          if (!u) return;
+          const followUps = [
+            'як ти зараз? 🏡',
+            'подумав/ла про тебе... все добре?',
+            'ти як?',
+          ];
+          const msg = followUps[Math.floor(Math.random() * followUps.length)];
+          await bot.telegram.sendMessage(telegramId, msg);
+        } catch(e) { console.error('Follow-up error:', e.message); }
+      }, delayMs);
+    }
 
     // Count messages for this user
     const { rows: countRows } = await pool.query(
@@ -628,9 +851,11 @@ async function initDB() {
       trial_ends        TIMESTAMPTZ,
       subscription_ends TIMESTAMPTZ,
       plan              TEXT,
+      source            TEXT DEFAULT 'direct',
       last_seen         TIMESTAMPTZ,
       created_at        TIMESTAMPTZ DEFAULT NOW()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'direct';
     CREATE TABLE IF NOT EXISTS messages (
       id          SERIAL PRIMARY KEY,
       telegram_id BIGINT NOT NULL,
@@ -646,11 +871,19 @@ async function initDB() {
     );
     CREATE TABLE IF NOT EXISTS sessions (
       telegram_id BIGINT PRIMARY KEY,
-      step        TEXT DEFAULT 'active'
+      step        TEXT DEFAULT 'active',
+      source      TEXT DEFAULT 'direct'
     );
+    ALTER TABLE sessions ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'direct';
     CREATE INDEX IF NOT EXISTS idx_messages_telegram_id ON messages(telegram_id);
     CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
     CREATE INDEX IF NOT EXISTS idx_memory_telegram_id ON memory(telegram_id);
+    CREATE TABLE IF NOT EXISTS affiliates (
+      telegram_id BIGINT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      source      TEXT NOT NULL UNIQUE,
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
   console.log('✅ Database tables ready');
 }
