@@ -333,6 +333,19 @@ bot.action("cancel_delete", async (ctx) => {
   await ctx.reply("Добре, нічого не видаляємо.");
 });
 
+// ── Topic button handler ─────────────────────────────────────
+const TOPIC_MAP = {
+  "🔥 Стрес": "Відчуваю сильний стрес",
+  "😰 Тривога": "Хочу поговорити про тривогу",
+  "😴 Сон": "Маю проблеми зі сном",
+  "💔 Стосунки": "Хочу поговорити про стосунки",
+  "😮‍💨 Робота": "Хочу поговорити про роботу",
+  "🫂 Самотність": "Відчуваю себе самотньо",
+  "🪞 Самооцінка": "Хочу поговорити про самооцінку",
+  "😤 Злість": "Відчуваю злість і не знаю що з нею робити",
+  "🏡 Просто поговорити": "Просто хочу поговорити",
+};
+
 // ── Main message handler ──────────────────────────────────────
 bot.on("text", async (ctx) => {
   const telegramId = ctx.from.id;
@@ -340,6 +353,14 @@ bot.on("text", async (ctx) => {
 
   // Skip commands
   if (text.startsWith("/")) return;
+
+  // Handle topic button press
+  if (TOPIC_MAP[text]) {
+    // Replace button text with full prompt
+    ctx.message.text = TOPIC_MAP[text];
+    // Remove keyboard
+    await ctx.reply("Слухаю 🏡", Markup.removeKeyboard());
+  }
 
   // Check session step
   const { rows: sessionRows } = await pool.query(
@@ -355,7 +376,7 @@ bot.on("text", async (ctx) => {
       "UPDATE sessions SET step = 'active' WHERE telegram_id = $1", [telegramId]
     );
     await ctx.reply(
-      `${name}... гарне ім'я 🏡\n\nУ тебе є ${TRIAL_DAYS} днів безкоштовно. Потім — підписка.\n\nРозкажи — що зараз на душі?`
+      `${name}... гарне ім'я 🏡\n\nРозкажи — що зараз на душі?`
     );
     return;
   }
@@ -406,13 +427,37 @@ bot.on("text", async (ctx) => {
 
     const reply = response.content[0].text;
     await saveMessage(telegramId, "assistant", reply);
-    await ctx.reply(reply);
 
-    // Update memory every 10 messages
-    const { rows } = await pool.query(
+    // Count messages for this user
+    const { rows: countRows } = await pool.query(
       "SELECT COUNT(*) FROM messages WHERE telegram_id = $1", [telegramId]
     );
-    if (parseInt(rows[0].count) % 10 === 0) {
+    const msgCount = parseInt(countRows[0].count);
+
+    // Show topic hints after first LUNO reply (message count 2)
+    const topicKeyboard = msgCount <= 2 ? Markup.keyboard([
+      ["🔥 Стрес", "😰 Тривога", "😴 Сон"],
+      ["💔 Стосунки", "😮‍💨 Робота", "🫂 Самотність"],
+      ["🪞 Самооцінка", "😤 Злість", "🏡 Просто поговорити"],
+    ]).resize() : Markup.removeKeyboard();
+
+    await ctx.reply(reply, msgCount <= 2 ? topicKeyboard : {});
+
+    // Subscription reminder on day 3 (after ~15 messages)
+    if (msgCount === 15) {
+      const trialEnds = user.trial_ends ? new Date(user.trial_ends) : null;
+      const daysLeft = trialEnds ? Math.ceil((trialEnds - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+      if (daysLeft > 0 && !user.subscription_ends) {
+        setTimeout(async () => {
+          await ctx.reply(
+            `До речі — у тебе ще ${daysLeft} ${daysLeft === 1 ? "день" : "днів"} безкоштовно 🏡\n\nЯкщо хочеш залишитись — можна підписатись коли буде зручно. /subscribe`
+          );
+        }, 3000);
+      }
+    }
+
+    // Update memory every 10 messages
+    if (msgCount % 10 === 0) {
       updateMemory(telegramId, user.name).catch(console.error);
     }
 
