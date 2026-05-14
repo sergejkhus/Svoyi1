@@ -376,7 +376,12 @@ bot.on("text", async (ctx) => {
       "UPDATE sessions SET step = 'active' WHERE telegram_id = $1", [telegramId]
     );
     await ctx.reply(
-      `${name}... гарне ім'я 🏡\n\nРозкажи — що зараз на душі?`
+      `${name}... гарне ім'я 🏡\n\nПро що хочеш поговорити?`,
+      Markup.keyboard([
+        ["🔥 Стрес", "😰 Тривога", "😴 Сон"],
+        ["💔 Стосунки", "😮‍💨 Робота", "🫂 Самотність"],
+        ["🪞 Самооцінка", "😤 Злість", "🏡 Просто поговорити"],
+      ]).resize()
     );
     return;
   }
@@ -434,14 +439,7 @@ bot.on("text", async (ctx) => {
     );
     const msgCount = parseInt(countRows[0].count);
 
-    // Show topic hints after first LUNO reply (message count 2)
-    const topicKeyboard = msgCount <= 2 ? Markup.keyboard([
-      ["🔥 Стрес", "😰 Тривога", "😴 Сон"],
-      ["💔 Стосунки", "😮‍💨 Робота", "🫂 Самотність"],
-      ["🪞 Самооцінка", "😤 Злість", "🏡 Просто поговорити"],
-    ]).resize() : Markup.removeKeyboard();
-
-    await ctx.reply(reply, msgCount <= 2 ? topicKeyboard : {});
+    await ctx.reply(reply);
 
     // Subscription reminder on day 3 (after ~15 messages)
     if (msgCount === 15) {
