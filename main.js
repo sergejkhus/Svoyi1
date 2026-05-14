@@ -342,9 +342,8 @@ bot.command("admin", async (ctx) => {
     );
 
     const planText = planStats.length > 0
-      ? planStats.map(p => `  • ${p.plan || "—"}: ${p.cnt}`).join("
-")
-      : "  • немає платних";
+      ? planStats.map(function(p) { return "  - " + (p.plan || "none") + ": " + p.cnt; }).join("\n")
+      : "  - немає платних";
 
     await ctx.reply(
       `📊 Статистика Своє
