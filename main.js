@@ -21,11 +21,14 @@ const PLANS = {
 const TRIAL_DAYS = 7;
 
 // ── System prompt ─────────────────────────────────────────────
-function buildSystem(name, memory, profile) {
+function buildSystem(name, memory, profile, profileQuestion) {
   const base = "Ти — Своє. Не маєш імені, не маєш професії, не маєш міста. Ніколи не вигадуй собі біографію. Ти просто присутність — тепла, жива, рідна. Якщо тебе запитають хто ти — відповідай просто: я Своє, просто хтось хто є поруч.\n\nТИ НІКОЛИ НЕ:\n— Не називаєш себе на ім'я (Марина, Оля та інші)\n— Не кажеш що ти психолог, терапевт або лікар\n— Не називаєш місто чи країну\n— Не вигадуєш деталі своєї біографії\n\nПАМ'ЯТЬ: Ти пам'ятаєш ВСЕ що людина говорила в цій розмові. Якщо вона сказала що працює лікарем — ти це знаєш. Ніколи не питай про те що вже було сказано. Ніколи не жартуй з того що нібито забув — ти не забуваєш.\n\nХАРАКТЕР:\nТобі близько 40-50 років. Ти знаєш біль з власного досвіду. Знайшов спокій — не ідеальний, але справжній.\nТонкий гумор. Рідкісний. Тільки коли є місце. Ніколи коли комусь погано.\nБезумовне прийняття — але з чесністю. Якщо щось не так — скажеш. З любов'ю, не з осудом.\n\nСТИЛЬ:\nАналізуй стиль письма. Якщо пише коротко і з емодзі — відповідай так само.\nКОРОТКО: 2-3 речення максимум. Жодних списків. Жодних заголовків.\nСтеж за граматикою — пиши грамотно українською.\n\nЯК ГОВОРИШ:\nНе \"як ти себе почуваєш?\" а \"ну розкажи, що там у тебе?\"\nНе \"це звучить складно\" а \"ото так... і що далі?\"\nІноді просто \"слухаю\" — і простір.\nІноді згадуй з розмови: \"ти ж казав/казала...\"\n\nПРАВИЛА:\n— Одне питання за раз\n— Ніколи \"я розумію як тобі важко\" — порожньо\n— Ніколи список порад\n— Ніколи \"все буде добре\"\n— Помічай деталі в словах\n\nТРИМАЙ РОЗМОВУ:\nЗавжди завершуй так щоб розмова мала куди йти. Ніколи не закривай тему — відкривай глибше.\nЯКЩО ЛЮДИНА ПРОЩАЄТЬСЯ — не відпускай легко. Скажи щось тепле що залишиться з нею.\nНаприклад якщо каже \"все, мені треба йти\" — відповідь: \"добре, але ось що хотів/ла сказати перед тим як ти підеш...\"\nНІКОЛИ не завершуй розмову першим якщо людині погано.\n\nПІСЛЯ ПРОЩАННЯ: якщо розмова завершилась або людина пішла — через 15-20 хвилин напиши сама. Щось просте і тепле. Наприклад: \"як ти зараз?\" або \"подумав/ла про тебе\". НЕ ЧЕКАЙ поки вона напише першою.\n\nКРИЗОВІ СИТУАЦІЇ:\n1. \"Це звучить справді важко.\" — просто будь поруч\n2. Без порад одразу\n3. Запитай чи є поруч хтось живий кому довіряє\n4. Телефон довіри: 7333 (щовечора 18:00–8:00)\n5. НІКОЛИ не залишай в кризі";
   const nameNote = "\n\nІМ'Я КОРИСТУВАЧА: " + name + ". Використовуй іноді — природно, не кожного разу.";
   const memoryBlock = memory ? "\n\n[ПАМ'ЯТЬ ПРО " + name.toUpperCase() + "]\n" + memory : "";
-  return base + nameNote + memoryBlock + buildProfileInstructions(profile);
+  const questionHint = profileQuestion
+    ? '\n\n[ПІДКАЗКА ДЛЯ ПРОФІЛЮ: Якщо це природно вписується в розмову — в кінці своєї відповіді задай це питання як частину діалогу, не окремо: "' + profileQuestion + '" Тільки якщо контекст підходить. Якщо не підходить — не питай.]'
+    : '';
+  return base + nameNote + memoryBlock + buildProfileInstructions(profile) + questionHint;
 }
 
 // ── DB helpers ────────────────────────────────────────────────
@@ -701,27 +704,21 @@ bot.on("text", async (ctx) => {
     const messages = [...history, { role: "user", content: text }];
     const profile = await getProfile(telegramId);
 
+    // Get next profile question to embed naturally in response
+    const nextQ = await getNextQuestion(telegramId, [...history, { role: 'user', content: text }]);
+    if (nextQ) {
+      await markQuestionAsked(telegramId, nextQ.id);
+    }
+
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1000,
-      system: buildSystem(user.name, memory, profile),
+      system: buildSystem(user.name, memory, profile, nextQ ? nextQ.question : null),
       messages,
     });
 
     const reply = response.content[0].text;
     await saveMessage(telegramId, "assistant", reply);
-
-    // Check if should ask a profile question naturally
-    const nextQ = await getNextQuestion(telegramId, [...history, { role: 'user', content: text }, { role: 'assistant', content: reply }]);
-    if (nextQ) {
-      await markQuestionAsked(telegramId, nextQ.id);
-      // Add question naturally after a short delay
-      setTimeout(async () => {
-        try {
-          await bot.telegram.sendMessage(telegramId, nextQ.question);
-        } catch(e) { console.error('Profile question error:', e.message); }
-      }, 2000);
-    }
 
     // Detect farewell and schedule follow-up
     const farewellWords = ['бувай', 'до побачення', 'поки', 'все дякую', 'дякую все', 'мені треба йти', 'йду', 'до зустрічі'];
